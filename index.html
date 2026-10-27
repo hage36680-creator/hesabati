@@ -14,9 +14,25 @@ button{border:0;border-radius:7px;padding:10px 14px;cursor:pointer;font-size:15p
 input,select{display:block;width:100%;padding:12px;margin:7px 0 14px;border:1px solid #cbd5e1;border-radius:7px;font-size:15px}label{font-weight:bold}
 .table-wrap{overflow-x:auto}table{border-collapse:collapse;width:100%;min-width:520px}th,td{padding:10px;text-align:center;border-bottom:1px solid #e2e8f0}th{background:#f8fafc}.small{padding:7px;margin:2px;color:white}.notice{background:#ecfdf5;padding:12px;border-radius:8px;line-height:1.8}footer{text-align:center;padding:20px;color:#64748b}
 @media(max-width:600px){.container{padding:10px}}
+
+#authGate{max-width:520px;margin:30px auto;padding:24px;background:white;border-radius:14px;box-shadow:0 2px 12px #0001;text-align:center}
+#authGate button{width:100%;margin:8px 0}
+#cloudStatus{font-size:14px;line-height:1.7}
+body:not(.authenticated) nav,body:not(.authenticated) main{display:none}
+#userBar{display:none;background:#f0fdf4;padding:10px;text-align:center}
+body.authenticated #userBar{display:block}
 </style>
 </head>
 <body>
+<section id="authGate">
+  <h2>أهلًا بك في حساباتي</h2>
+  <p>سجّل الدخول بحساب Google للوصول إلى بيانات محلك المحفوظة بأمان.</p>
+  <button id="googleLogin" class="primary" type="button">المتابعة باستخدام Google</button>
+  <button id="googleLogout" class="secondary" type="button" hidden>تسجيل الخروج</button>
+  <p id="authMessage" role="status">جارٍ الاتصال بخدمات تسجيل الدخول...</p>
+  <p id="cloudStatus" class="notice">لا تدخل بيانات حقيقية قبل التأكد من قواعد الأمان وإعداد النطاق المسموح به.</p>
+</section>
+<div id="userBar"><span id="signedInAs"></span> — <button id="signOutTop" class="secondary" type="button">تسجيل الخروج</button> <span id="syncStatus"> | مزامنة البيانات السحابية</span></div>
 <header><h1>📊 حساباتي</h1><p>برنامج بسيط لإدارة المحلات</p></header>
 <nav>
 <button onclick="showPage('home')">الرئيسية</button><button onclick="showPage('products')">المنتجات</button><button onclick="showPage('sales')">المبيعات</button><button onclick="showPage('expenses')">المصروفات</button><button onclick="showPage('debts')">ديون العملاء</button>
@@ -28,51 +44,350 @@ input,select{display:block;width:100%;padding:12px;margin:7px 0 14px;border:1px 
 <div class="card"><h3>إجمالي المصروفات</h3><div id="totalExpenses" class="number">0 ج.م</div></div>
 <div class="card"><h3>الربح التقديري</h3><div id="netProfit" class="number">0 ج.م</div></div>
 <div class="card"><h3>ديون العملاء المتبقية</h3><div id="totalDebts" class="number">0 ج.م</div></div></div>
-<div class="panel"><h3>أهلًا بيك في حساباتي 👋</h3><p>أضف المنتجات وسجّل المبيعات والمصروفات وديون العملاء.</p><div class="notice">نسخة تجريبية: البيانات محفوظة على هذا المتصفح فقط. استخدم بيانات تجريبية ولا تعتمد عليها وحدها في حسابات محل حقيقي.</div></div></section>
-<section id="products" class="page"><h2>المنتجات</h2><div class="panel"><h3 id="productTitle">إضافة منتج</h3><form id="productForm"><input id="productId" type="hidden"><label>اسم المنتج</label><input id="productName" required maxlength="100" placeholder="مثلاً: سكر"><label>تكلفة شراء الوحدة</label><input id="productCost" type="number" min="0" step=".01" required><label>سعر بيع الوحدة</label><input id="productPrice" type="number" min="0" step=".01" required><label>الكمية</label><input id="productQuantity" type="number" min="0" step="1" required><button class="primary">حفظ المنتج</button><button type="button" class="secondary" id="cancelEdit" hidden>إلغاء</button></form></div><div class="panel"><h3>قائمة المنتجات</h3><div class="table-wrap"><table><thead><tr><th>الاسم</th><th>التكلفة</th><th>سعر البيع</th><th>الكمية</th><th>إجراءات</th></tr></thead><tbody id="productsTable"></tbody></table></div></div></section>
-<section id="sales" class="page"><h2>المبيعات</h2><div class="panel"><form id="saleForm"><label>المنتج</label><select id="saleProduct" required></select><label>الكمية المباعة</label><input id="saleQuantity" type="number" min="1" step="1" required><label>طريقة الدفع</label><select id="saleType"><option value="cash">نقدي</option><option value="debt">آجل</option></select><div id="customerField" hidden><label>اسم العميل</label><input id="saleCustomer" maxlength="100"></div><button class="primary">تسجيل البيع</button></form></div><div class="panel"><h3>سجل المبيعات</h3><div class="table-wrap"><table><thead><tr><th>التاريخ</th><th>المنتج</th><th>الكمية</th><th>الإجمالي</th><th>الدفع</th></tr></thead><tbody id="salesTable"></tbody></table></div></div></section>
+<div class="panel"><h3>أهلًا بيك في حساباتي 👋</h3><p>أضف المنتجات وسجّل المبيعات والمصروفات وديون العملاء.</p><div class="notice">البيانات مرتبطة بحسابك وتتم مزامنتها مع Firebase بعد تسجيل الدخول. احتفظ بنسخة احتياطية واختبر الحساب ببيانات تجريبية قبل الاستخدام الفعلي.</div><p><button type="button" class="primary" id="exportBackup">تنزيل نسخة احتياطية</button> <button type="button" class="secondary" id="importBackupBtn">استعادة نسخة احتياطية</button><input type="file" id="importBackupFile" accept=".json,application/json" hidden></p></div></section>
+<section id="products" class="page"><h2>المنتجات</h2><div class="panel"><h3 id="productTitle">إضافة منتج</h3><form id="productForm"><input id="productId" type="hidden"><label>اسم المنتج</label><input id="productName" required maxlength="100" placeholder="مثلاً: سكر"><label>تكلفة شراء الوحدة</label><input id="productCost" type="number" min="0" step=".01" required><label>سعر بيع الوحدة</label><input id="productPrice" type="number" min="0" step=".01" required><label>الكمية</label><input id="productQuantity" type="number" min="0" step="1" required><button class="primary">حفظ المنتج</button><button type="button" class="secondary" id="cancelEdit" hidden>إلغاء</button></form></div><div class="panel"><h3>قائمة المنتجات</h3><label>بحث سريع عن منتج</label><input id="productSearch" placeholder="اكتب اسم المنتج أو أول حروفه..."><div class="table-wrap"><table><thead><tr><th>الاسم</th><th>التكلفة</th><th>سعر البيع</th><th>الكمية</th><th>إجراءات</th></tr></thead><tbody id="productsTable"></tbody></table></div></div></section>
+<section id="sales" class="page"><h2>المبيعات</h2><div class="panel"><h3>إضافة منتجات إلى الفاتورة</h3><label>ابحث عن المنتج بالاسم أو أول حروفه</label><input id="saleSearch" placeholder="اكتب اسم المنتج..."><label>المنتج</label><select id="saleProduct"></select><label>الكمية</label><input id="saleQuantity" type="number" min="1" step="1" value="1"><button type="button" class="primary" id="addToCart">إضافة للفاتورة</button><div class="table-wrap"><table><thead><tr><th>المنتج</th><th>سعر الوحدة</th><th>الكمية</th><th>الإجمالي</th><th>إجراء</th></tr></thead><tbody id="cartTable"></tbody></table></div><h3>إجمالي الفاتورة: <span id="cartTotal">0 ج.م</span></h3><label>طريقة الدفع</label><select id="saleType"><option value="cash">نقدي</option><option value="debt">آجل</option></select><div id="customerField" hidden><label>اسم العميل</label><input id="saleCustomer" maxlength="100"></div><button type="button" class="primary" id="completeSale">تأكيد البيع</button><button type="button" class="secondary" id="clearCart">إفراغ الفاتورة</button></div><div class="panel"><h3>سجل المبيعات</h3><div class="table-wrap"><table><thead><tr><th>التاريخ</th><th>رقم الفاتورة</th><th>المنتج</th><th>الكمية</th><th>الإجمالي</th><th>الدفع</th></tr></thead><tbody id="salesTable"></tbody></table></div></div></section>
 <section id="expenses" class="page"><h2>المصروفات</h2><div class="panel"><form id="expenseForm"><label>سبب المصروف</label><input id="expenseName" required maxlength="100" placeholder="مثلاً: كهرباء"><label>المبلغ بالجنيه</label><input id="expenseAmount" type="number" min=".01" step=".01" required><button class="primary">إضافة المصروف</button></form></div><div class="panel"><h3>سجل المصروفات</h3><div class="table-wrap"><table><thead><tr><th>التاريخ</th><th>السبب</th><th>المبلغ</th><th>إجراء</th></tr></thead><tbody id="expensesTable"></tbody></table></div></div></section>
-<section id="debts" class="page"><h2>ديون العملاء</h2><div class="panel"><form id="debtForm"><label>اسم العميل</label><input id="debtCustomer" required maxlength="100"><label>المبلغ بالجنيه</label><input id="debtAmount" type="number" min=".01" step=".01" required><button class="primary">إضافة الدين</button></form></div><div class="panel"><h3>سجل الديون</h3><div class="table-wrap"><table><thead><tr><th>العميل</th><th>الأصل</th><th>المدفوع</th><th>المتبقي</th><th>إجراءات</th></tr></thead><tbody id="debtsTable"></tbody></table></div></div></section>
+<section id="debts" class="page"><h2>ديون العملاء</h2><div class="panel"><form id="debtForm"><label>اسم العميل</label><input id="debtCustomer" required maxlength="100"><label>المبلغ بالجنيه</label><input id="debtAmount" type="number" min=".01" step=".01" required><button class="primary">إضافة الدين</button></form></div><div class="panel"><h3>سجل الديون</h3><label for="debtSearch">ابحث عن العميل</label><input id="debtSearch" type="search" placeholder="اكتب اسم العميل أو جزءًا منه..."><p id="debtSearchSummary" class="notice" hidden></p><div class="table-wrap"><table><thead><tr><th>العميل</th><th>الأصل</th><th>المدفوع</th><th>المتبقي</th><th>إجراءات</th></tr></thead><tbody id="debtsTable"></tbody></table></div></div></section>
 </main><footer>حساباتي — نسخة تجريبية</footer>
 <script>
 "use strict";
-const KEY="hesabati_starter_v1";
-function blank(){return {products:[],sales:[],expenses:[],debts:[]}}
-function load(){try{let x=JSON.parse(localStorage.getItem(KEY)||"null");return x&&Array.isArray(x.products)&&Array.isArray(x.sales)&&Array.isArray(x.expenses)&&Array.isArray(x.debts)?x:blank()}catch(e){return blank()}}
-let db=load();
-function save(){try{localStorage.setItem(KEY,JSON.stringify(db));return true}catch(e){alert("تعذر حفظ البيانات في المتصفح.");return false}}
-function id(){return Date.now().toString(36)+Math.random().toString(36).slice(2)}
-function money(n){return Number(n||0).toLocaleString("ar-EG",{minimumFractionDigits:2,maximumFractionDigits:2})+" ج.م"}
-function now(){return new Date().toLocaleString("ar-EG")}
-function showPage(id){document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));document.getElementById(id).classList.add("active");render()}
-function addCell(tr,text){let td=document.createElement("td");td.textContent=text;tr.appendChild(td);return td}
-function btn(text,cls,fn){let b=document.createElement("button");b.type="button";b.className="small "+cls;b.textContent=text;b.onclick=fn;return b}
-function renderProducts(){
- let tb=document.getElementById("productsTable");tb.replaceChildren();
- db.products.forEach(p=>{let tr=document.createElement("tr");addCell(tr,p.name);addCell(tr,money(p.cost));addCell(tr,money(p.price));addCell(tr,p.quantity);let td=addCell(tr,"");
- td.appendChild(btn("تعديل","secondary",()=>{productId.value=p.id;productName.value=p.name;productCost.value=p.cost;productPrice.value=p.price;productQuantity.value=p.quantity;productTitle.textContent="تعديل المنتج";cancelEdit.hidden=false;showPage("products")}));
- td.appendChild(btn("حذف","danger",()=>{if(db.sales.some(s=>s.productId===p.id)){alert("لا يمكن حذف منتج له مبيعات مسجلة.");return}if(confirm("حذف المنتج؟")){db.products=db.products.filter(x=>x.id!==p.id);if(save())render()}}));tb.appendChild(tr)});
- if(!db.products.length){let tr=document.createElement("tr");addCell(tr,"لا توجد منتجات بعد").colSpan=5;tb.appendChild(tr)}
- let sel=document.getElementById("saleProduct"),old=sel.value;sel.replaceChildren();let op=document.createElement("option");op.value="";op.textContent="اختر المنتج";sel.appendChild(op);
- db.products.forEach(p=>{let o=document.createElement("option");o.value=p.id;o.textContent=p.name+" — المتاح "+p.quantity;sel.appendChild(o)});if(db.products.some(p=>p.id===old))sel.value=old;
+const $ = id => document.getElementById(id);
+let KEY = "hesabati_starter_v1";
+function blank(){return {products:[],sales:[],expenses:[],debts:[]};}
+function load(){
+  try {
+    const raw=localStorage.getItem(KEY);
+    if(!raw) return blank();
+    const x=JSON.parse(raw);
+    if(!x || !Array.isArray(x.products)||!Array.isArray(x.sales)||!Array.isArray(x.expenses)||!Array.isArray(x.debts)) {
+      alert("تعذر قراءة البيانات المحفوظة؛ لم يتم حذفها. استخدم استعادة نسخة احتياطية إن وجدت.");
+      return blank();
+    }
+    return x;
+  } catch(e) { alert("تعذر قراءة البيانات المحفوظة؛ لم يتم حذفها."); return blank(); }
 }
-function resetProduct(){productForm.reset();productId.value="";productTitle.textContent="إضافة منتج";cancelEdit.hidden=true}
-productForm.onsubmit=e=>{e.preventDefault();let id0=productId.value,name=productName.value.trim(),cost=Number(productCost.value),price=Number(productPrice.value),qty=Number(productQuantity.value);
- if(!name||!Number.isFinite(cost)||cost<0||!Number.isFinite(price)||price<0||!Number.isInteger(qty)||qty<0){alert("راجع البيانات المدخلة.");return}
- if(id0){let p=db.products.find(x=>x.id===id0);if(!p)return alert("المنتج غير موجود");let sold=db.sales.filter(s=>s.productId===id0).reduce((a,s)=>a+s.quantity,0);if(qty<sold)return alert("الكمية لا يمكن أن تقل عن الكمية المباعة");Object.assign(p,{name,cost,price,quantity:qty})}else db.products.push({id:id(),name,cost,price,quantity:qty});
- if(save()){resetProduct();render();alert("تم حفظ المنتج")}};
-cancelEdit.onclick=resetProduct;
-saleType.onchange=()=>{let yes=saleType.value==="debt";customerField.hidden=!yes;saleCustomer.required=yes};
-saleForm.onsubmit=e=>{e.preventDefault();let p=db.products.find(x=>x.id===saleProduct.value),qty=Number(saleQuantity.value),type=saleType.value,customer=saleCustomer.value.trim();if(!p)return alert("اختار المنتج");if(!Number.isInteger(qty)||qty<1)return alert("اكتب كمية صحيحة");if(qty>p.quantity)return alert("الكمية أكبر من المخزون");if(type==="debt"&&!customer)return alert("اكتب اسم العميل");
- let s={id:id(),productId:p.id,productName:p.name,quantity:qty,unitPrice:p.price,unitCost:p.cost,total:p.price*qty,type,customer:type==="debt"?customer:"",date:now()};p.quantity-=qty;db.sales.push(s);if(type==="debt")db.debts.push({id:id(),customer,original:s.total,paid:0,saleId:s.id});if(save()){saleForm.reset();customerField.hidden=true;saleCustomer.required=false;render();alert("تم تسجيل البيع")}};
-function renderSales(){let tb=salesTable;tb.replaceChildren();[...db.sales].reverse().forEach(s=>{let tr=document.createElement("tr");addCell(tr,s.date);addCell(tr,s.productName);addCell(tr,s.quantity);addCell(tr,money(s.total));addCell(tr,s.type==="cash"?"نقدي":"آجل: "+s.customer);tb.appendChild(tr)});if(!db.sales.length){let tr=document.createElement("tr");addCell(tr,"لا توجد مبيعات").colSpan=5;tb.appendChild(tr)}}
-expenseForm.onsubmit=e=>{e.preventDefault();let name=expenseName.value.trim(),amount=Number(expenseAmount.value);if(!name||!Number.isFinite(amount)||amount<=0)return alert("راجع المصروف");db.expenses.push({id:id(),name,amount,date:now()});if(save()){expenseForm.reset();render()}};
-function renderExpenses(){let tb=expensesTable;tb.replaceChildren();[...db.expenses].reverse().forEach(x=>{let tr=document.createElement("tr");addCell(tr,x.date);addCell(tr,x.name);addCell(tr,money(x.amount));let td=addCell(tr,"");td.appendChild(btn("حذف","danger",()=>{if(confirm("حذف المصروف؟")){db.expenses=db.expenses.filter(y=>y.id!==x.id);if(save())render()}}));tb.appendChild(tr)});if(!db.expenses.length){let tr=document.createElement("tr");addCell(tr,"لا توجد مصروفات").colSpan=4;tb.appendChild(tr)}}
-debtForm.onsubmit=e=>{e.preventDefault();let customer=debtCustomer.value.trim(),amount=Number(debtAmount.value);if(!customer||!Number.isFinite(amount)||amount<=0)return alert("راجع بيانات الدين");db.debts.push({id:id(),customer,original:amount,paid:0,saleId:null});if(save()){debtForm.reset();render()}};
-function renderDebts(){let tb=debtsTable;tb.replaceChildren();db.debts.forEach(d=>{let tr=document.createElement("tr"),remaining=Math.max(0,d.original-d.paid);addCell(tr,d.customer);addCell(tr,money(d.original));addCell(tr,money(d.paid));addCell(tr,money(remaining));let td=addCell(tr,"");if(remaining>0)td.appendChild(btn("تسجيل سداد","primary",()=>{let v=prompt("المتبقي "+remaining+" جنيه. اكتب المبلغ المدفوع:");if(v===null||v.trim()==="")return;let n=Number(v);if(!Number.isFinite(n)||n<=0||n>remaining)return alert("مبلغ غير صحيح");d.paid+=n;if(save())render()}));else td.textContent="تم السداد";tb.appendChild(tr)});if(!db.debts.length){let tr=document.createElement("tr");addCell(tr,"لا توجد ديون").colSpan=5;tb.appendChild(tr)}}
-function renderHome(){let sales=db.sales.reduce((a,s)=>a+s.total,0),cost=db.sales.reduce((a,s)=>a+s.unitCost*s.quantity,0),expenses=db.expenses.reduce((a,x)=>a+x.amount,0),debts=db.debts.reduce((a,d)=>a+Math.max(0,d.original-d.paid),0);totalProducts.textContent=db.products.length;totalSales.textContent=money(sales);totalExpenses.textContent=money(expenses);netProfit.textContent=money(sales-cost-expenses);totalDebts.textContent=money(debts)}
-function render(){renderProducts();renderSales();renderExpenses();renderDebts();renderHome()}
+let db=load(), cart=[];
+window.__hesabatiSetCloudUser = (uid, cloudData) => {
+  KEY = "hesabati_user_" + uid;
+  const valid = cloudData && Array.isArray(cloudData.products) && Array.isArray(cloudData.sales) && Array.isArray(cloudData.expenses) && Array.isArray(cloudData.debts);
+  if (valid) db = cloudData;
+  else {
+    // Use only this user's browser-local data as a one-time migration source when cloud data is empty.
+    db = load();
+    try { localStorage.setItem(KEY, JSON.stringify(db)); } catch(e) {}
+  }
+  cart = [];
+  render();
+};
+window.__hesabatiGetDb = () => db;
+window.__hesabatiSetSyncStatus = (message) => { const el=$("syncStatus"); if(el) el.textContent=" | "+message; };
+
+function save(){
+  try {
+    localStorage.setItem(KEY,JSON.stringify(db));
+    if (window.__hesabatiCloudSave) window.__hesabatiCloudSave(db);
+    return true;
+  }
+  catch(e){ alert("تعذر حفظ البيانات. قد تكون مساحة المتصفح ممتلئة. صدّر نسخة احتياطية."); return false; }
+}
+function id(){return Date.now().toString(36)+Math.random().toString(36).slice(2);}
+function money(n){return Number(n||0).toLocaleString("ar-EG",{minimumFractionDigits:2,maximumFractionDigits:2})+" ج.م";}
+function now(){return new Date().toLocaleString("ar-EG");}
+function showPage(pageId){
+  document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));
+  const page=$(pageId); if(page) page.classList.add("active");
+  render();
+}
+function addCell(tr,value){
+  const td=document.createElement("td"); td.textContent=String(value ?? ""); tr.appendChild(td); return td;
+}
+function btn(text,cls,fn){
+  const b=document.createElement("button"); b.type="button"; b.className="small "+cls; b.textContent=text; b.addEventListener("click",fn); return b;
+}
+function emptyRow(tbody,message,colspan){
+  const tr=document.createElement("tr"),td=addCell(tr,message);td.colSpan=colspan;tbody.appendChild(tr);
+}
+function renderProducts(){
+  const tb=$("productsTable"), term=$("productSearch").value.trim().toLocaleLowerCase();
+  tb.replaceChildren();
+  db.products.filter(p=>(p.name||"").toLocaleLowerCase().includes(term)).forEach(p=>{
+    const tr=document.createElement("tr");
+    addCell(tr,p.name);addCell(tr,money(p.cost));addCell(tr,money(p.price));addCell(tr,p.quantity);
+    const td=addCell(tr,"");
+    td.appendChild(btn("تعديل","secondary",()=>{
+      $("productId").value=p.id;$("productName").value=p.name;$("productCost").value=p.cost;
+      $("productPrice").value=p.price;$("productQuantity").value=p.quantity;
+      $("productTitle").textContent="تعديل المنتج";$("cancelEdit").hidden=false;showPage("products");
+    }));
+    td.appendChild(btn("حذف","danger",()=>{
+      if(db.sales.some(s=>s.productId===p.id)){alert("لا يمكن حذف منتج له مبيعات مسجلة.");return;}
+      if(confirm("هل تريد حذف المنتج؟")){db.products=db.products.filter(x=>x.id!==p.id);if(save())render();}
+    }));
+    tb.appendChild(tr);
+  });
+  if(!tb.children.length)emptyRow(tb,term?"لا توجد منتجات مطابقة":"لا توجد منتجات بعد",5);
+  const sel=$("saleProduct"),old=sel.value,search=$("saleSearch").value.trim().toLocaleLowerCase();
+  sel.replaceChildren();const op=document.createElement("option");op.value="";op.textContent="اختر المنتج";sel.appendChild(op);
+  db.products.filter(p=>(p.name||"").toLocaleLowerCase().includes(search)&&Number(p.quantity)>0).forEach(p=>{
+    const o=document.createElement("option");o.value=p.id;o.textContent=p.name+" — "+money(p.price)+" — المتاح "+p.quantity;sel.appendChild(o);
+  });
+  if(db.products.some(p=>p.id===old&&Number(p.quantity)>0))sel.value=old;
+}
+function resetProduct(){
+  $("productForm").reset();$("productId").value="";$("productTitle").textContent="إضافة منتج";$("cancelEdit").hidden=true;
+}
+$("productForm").addEventListener("submit",e=>{
+  e.preventDefault();
+  const productId=$("productId").value,name=$("productName").value.trim();
+  const cost=Number($("productCost").value),price=Number($("productPrice").value),qty=Number($("productQuantity").value);
+  if(!name||!Number.isFinite(cost)||cost<0||!Number.isFinite(price)||price<0||!Number.isInteger(qty)||qty<0){alert("راجع اسم المنتج والتكلفة والسعر والكمية.");return;}
+  const duplicate=db.products.some(p=>p.name.trim().toLocaleLowerCase()===name.toLocaleLowerCase()&&p.id!==productId);
+  if(duplicate&&!confirm("يوجد منتج بنفس الاسم. هل تريد الحفظ على أي حال؟"))return;
+  if(productId){
+    const p=db.products.find(x=>x.id===productId);if(!p){alert("المنتج غير موجود.");return;}
+    Object.assign(p,{name,cost,price,quantity:qty});
+  }else db.products.push({id:id(),name,cost,price,quantity:qty});
+  if(save()){resetProduct();render();alert("تم حفظ المنتج بنجاح.");}
+});
+$("cancelEdit").addEventListener("click",resetProduct);
+$("saleType").addEventListener("change",()=>{
+  const isDebt=$("saleType").value==="debt";$("customerField").hidden=!isDebt;$("saleCustomer").required=isDebt;
+});
+$("saleSearch").addEventListener("input",renderProducts);
+$("productSearch").addEventListener("input",renderProducts);
+$("addToCart").addEventListener("click",()=>{
+  const product=db.products.find(x=>x.id===$("saleProduct").value),qty=Number($("saleQuantity").value);
+  if(!product){alert("اختار المنتج من القائمة أولًا.");return;}
+  if(!Number.isInteger(qty)||qty<1){alert("اكتب كمية صحيحة أكبر من صفر.");return;}
+  const line=cart.find(x=>x.productId===product.id),already=line?line.quantity:0;
+  if(qty+already>Number(product.quantity)){alert("الكمية المطلوبة أكبر من المتاح في المخزون.");return;}
+  if(line)line.quantity+=qty;
+  else cart.push({productId:product.id,name:product.name,unitPrice:Number(product.price),unitCost:Number(product.cost),quantity:qty});
+  $("saleQuantity").value=1;renderCart();
+});
+function renderCart(){
+  const tb=$("cartTable");tb.replaceChildren();
+  cart.forEach(item=>{
+    const tr=document.createElement("tr");addCell(tr,item.name);addCell(tr,money(item.unitPrice));addCell(tr,item.quantity);addCell(tr,money(item.quantity*item.unitPrice));
+    const td=addCell(tr,"");
+    td.appendChild(btn("تعديل الكمية","secondary",()=>{
+      const value=prompt("اكتب الكمية الجديدة:",String(item.quantity));if(value===null)return;
+      const n=Number(value),p=db.products.find(x=>x.id===item.productId);
+      if(!Number.isInteger(n)||n<1){alert("اكتب كمية صحيحة أكبر من صفر.");return;}
+      if(!p||n>Number(p.quantity)){alert("الكمية المطلوبة أكبر من المتاح.");return;}
+      item.quantity=n;renderCart();
+    }));
+    td.appendChild(btn("حذف","danger",()=>{cart=cart.filter(x=>x.productId!==item.productId);renderCart();}));
+    tb.appendChild(tr);
+  });
+  if(!cart.length)emptyRow(tb,"الفاتورة فارغة — أضف منتجًا من القائمة أعلاه",5);
+  $("cartTotal").textContent=money(cart.reduce((sum,x)=>sum+x.quantity*x.unitPrice,0));
+}
+$("clearCart").addEventListener("click",()=>{if(cart.length&&confirm("هل تريد إفراغ الفاتورة الحالية؟")){cart=[];renderCart();}});
+$("completeSale").addEventListener("click",()=>{
+  // Check the actual in-memory cart, not table markup.
+  if(!Array.isArray(cart)||cart.length===0){alert("الفاتورة فارغة. اضغط «إضافة للفاتورة» بعد اختيار المنتج.");return;}
+  const type=$("saleType").value,customer=$("saleCustomer").value.trim();
+  if(type==="debt"&&!customer){alert("اكتب اسم العميل في حالة البيع الآجل.");$("saleCustomer").focus();return;}
+  for(const item of cart){
+    const p=db.products.find(x=>x.id===item.productId);
+    if(!p||!Number.isInteger(item.quantity)||item.quantity<1||item.quantity>Number(p.quantity)){
+      alert("الكمية لم تعد متاحة للمنتج: "+item.name+". راجع المخزون.");return;
+    }
+  }
+  const invoiceId="INV-"+Date.now().toString().slice(-8),date=now();
+  const previous=JSON.stringify(db);
+  for(const item of cart){
+    const p=db.products.find(x=>x.id===item.productId),total=Number((item.quantity*item.unitPrice).toFixed(2));
+    p.quantity=Number(p.quantity)-item.quantity;
+    const sale={id:id(),invoiceId,productId:p.id,productName:p.name,quantity:item.quantity,unitPrice:item.unitPrice,unitCost:item.unitCost,total,type,customer:type==="debt"?customer:"",date};
+    db.sales.push(sale);
+    if(type==="debt")db.debts.push({id:id(),customer,original:total,paid:0,saleId:sale.id,invoiceId});
+  }
+  if(save()){
+    cart=[];$("saleQuantity").value=1;$("saleType").value="cash";$("saleCustomer").value="";
+    $("customerField").hidden=true;$("saleCustomer").required=false;$("saleSearch").value="";
+    render();alert("تم تسجيل الفاتورة "+invoiceId+" بنجاح.");
+  } else {
+    // Revert in-memory changes if persistence failed.
+    try{db=JSON.parse(previous);}catch(e){}
+    render();
+  }
+});
+function renderSales(){
+  const tb=$("salesTable");tb.replaceChildren();
+  [...db.sales].reverse().forEach(s=>{
+    const tr=document.createElement("tr");addCell(tr,s.date||"—");addCell(tr,s.invoiceId||"—");addCell(tr,s.productName||"—");
+    addCell(tr,s.quantity);addCell(tr,money(s.total));addCell(tr,s.type==="cash"?"نقدي":"آجل: "+(s.customer||""));tb.appendChild(tr);
+  });
+  if(!db.sales.length)emptyRow(tb,"لا توجد مبيعات بعد",6);
+}
+$("expenseForm").addEventListener("submit",e=>{
+  e.preventDefault();const name=$("expenseName").value.trim(),amount=Number($("expenseAmount").value);
+  if(!name||!Number.isFinite(amount)||amount<=0){alert("راجع سبب المصروف والمبلغ.");return;}
+  db.expenses.push({id:id(),name,amount,date:now()});if(save()){$("expenseForm").reset();render();}
+});
+function renderExpenses(){
+  const tb=$("expensesTable");tb.replaceChildren();
+  [...db.expenses].reverse().forEach(x=>{
+    const tr=document.createElement("tr");addCell(tr,x.date||"—");addCell(tr,x.name);addCell(tr,money(x.amount));
+    const td=addCell(tr,"");td.appendChild(btn("حذف","danger",()=>{
+      if(confirm("هل تريد حذف المصروف؟")){db.expenses=db.expenses.filter(y=>y.id!==x.id);if(save())render();}
+    }));tb.appendChild(tr);
+  });
+  if(!db.expenses.length)emptyRow(tb,"لا توجد مصروفات بعد",4);
+}
+$("debtForm").addEventListener("submit",e=>{
+  e.preventDefault();const customer=$("debtCustomer").value.trim(),amount=Number($("debtAmount").value);
+  if(!customer||!Number.isFinite(amount)||amount<=0){alert("راجع اسم العميل والمبلغ.");return;}
+  db.debts.push({id:id(),customer,original:amount,paid:0,saleId:null});if(save()){$("debtForm").reset();render();}
+});
+$("debtSearch").addEventListener("input",renderDebts);
+function renderDebts(){
+  const tb=$("debtsTable");tb.replaceChildren();
+  const q=($("debtSearch")?.value||"").trim().toLocaleLowerCase("ar");
+  const filtered=db.debts.filter(d=>(String(d.customer||"")).toLocaleLowerCase("ar").includes(q));
+  const summary=$("debtSearchSummary");
+  if(summary){
+    if(q){const total=filtered.reduce((a,d)=>a+(Number(d.original)||0),0),paidTotal=filtered.reduce((a,d)=>a+(Number(d.paid)||0),0),remainingTotal=filtered.reduce((a,d)=>a+Math.max(0,(Number(d.original)||0)-(Number(d.paid)||0)),0);summary.hidden=false;summary.textContent=`نتائج البحث: ${filtered.length} سجل — إجمالي الدين: ${money(total)} — المدفوع: ${money(paidTotal)} — المتبقي على العميل في كل السجلات: ${money(remainingTotal)}`;}
+    else summary.hidden=true;
+  }
+  filtered.forEach(d=>{
+    const original=Math.max(0,Number(d.original)||0),paid=Math.min(original,Math.max(0,Number(d.paid)||0)),remaining=Math.max(0,Number((original-paid).toFixed(2))),tr=document.createElement("tr");
+    addCell(tr,d.customer);addCell(tr,money(original));addCell(tr,money(paid));addCell(tr,money(remaining));const td=addCell(tr,"");
+    if(remaining>0)td.appendChild(btn("تسجيل سداد","primary",()=>{
+      const value=prompt("العميل: "+d.customer+"\nأصل الدين: "+money(original)+"\nالمدفوع سابقًا: "+money(paid)+"\nالمتبقي: "+money(remaining)+"\n\nاكتب المبلغ الذي دفعه العميل:");
+      if(value===null||value.trim()==="")return;const n=Number(value);
+      if(!Number.isFinite(n)||n<=0||n>remaining+0.000001){alert("مبلغ غير صحيح؛ أدخل مبلغًا أكبر من صفر ولا يتجاوز المتبقي.");return;}
+      d.paid=Math.min(original,Number((paid+n).toFixed(2)));if(save())render();
+    }));else td.textContent="تم السداد";
+    tb.appendChild(tr);
+  });
+  if(!filtered.length)emptyRow(tb,q?"لا توجد ديون مطابقة لبحثك":"لا توجد ديون مسجلة",5);
+}
+function renderHome(){
+  const sales=db.sales.reduce((a,s)=>a+(Number(s.total)||0),0),cost=db.sales.reduce((a,s)=>a+(Number(s.unitCost)||0)*(Number(s.quantity)||0),0);
+  const expenses=db.expenses.reduce((a,x)=>a+(Number(x.amount)||0),0),debts=db.debts.reduce((a,d)=>a+Math.max(0,(Number(d.original)||0)-(Number(d.paid)||0)),0);
+  $("totalProducts").textContent=db.products.length;$("totalSales").textContent=money(sales);
+  $("totalExpenses").textContent=money(expenses);$("netProfit").textContent=money(sales-cost-expenses);$("totalDebts").textContent=money(debts);
+}
+function render(){renderProducts();renderSales();renderExpenses();renderDebts();renderHome();renderCart();}
+
+$("exportBackup").addEventListener("click",()=>{
+  const blob=new Blob([JSON.stringify({app:"حساباتي",version:1,exportedAt:new Date().toISOString(),data:db},null,2)],{type:"application/json;charset=utf-8"});
+  const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="hesabati-backup-"+new Date().toISOString().slice(0,10)+".json";document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+});
+$("importBackupBtn").addEventListener("click",()=>$("importBackupFile").click());
+$("importBackupFile").addEventListener("change",async e=>{
+  const file=e.target.files&&e.target.files[0];if(!file)return;
+  try{
+    const parsed=JSON.parse(await file.text()),candidate=parsed.data||parsed;
+    if(!candidate||!Array.isArray(candidate.products)||!Array.isArray(candidate.sales)||!Array.isArray(candidate.expenses)||!Array.isArray(candidate.debts))throw new Error("bad backup");
+    if(!confirm("استعادة النسخة ستستبدل البيانات الحالية. نزّل نسخة احتياطية من البيانات الحالية أولًا. هل تريد المتابعة؟"))return;
+    const old=db;db=candidate;
+    if(save()){cart=[];render();alert("تمت استعادة النسخة الاحتياطية.");}else db=old;
+  }catch(err){alert("ملف النسخة الاحتياطية غير صالح أو تالف.");}
+  finally{e.target.value="";}
+});
+
 render();
 </script>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyC2FAA6x_QPkFDdNNyXDP7OQVy8oCDjZ0A",
+  authDomain: "hesabati-d78c8.firebaseapp.com",
+  projectId: "hesabati-d78c8",
+  storageBucket: "hesabati-d78c8.firebasestorage.app",
+  messagingSenderId: "159151997021",
+  appId: "1:159151997021:web:079d8ce35697df35e64db4",
+  measurementId: "G-L5HPB30CWE"
+};
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const store = getFirestore(app);
+const provider = new GoogleAuthProvider();
+const $ = id => document.getElementById(id);
+let activeUid = null;
+let saveQueue = Promise.resolve();
+
+function message(text) { $("authMessage").textContent = text; }
+function dataRef(uid) { return doc(store, "users", uid, "appData", "main"); }
+
+$("googleLogin").addEventListener("click", async () => {
+  message("جارٍ فتح نافذة Google...");
+  try { await signInWithPopup(auth, provider); }
+  catch (e) {
+    console.error(e);
+    message(e.code === "auth/unauthorized-domain"
+      ? "هذا النطاق غير مسموح به. أضف نطاق موقعك في Firebase Authentication > Settings > Authorized domains."
+      : "تعذر تسجيل الدخول. تأكد من تفعيل Google في Authentication ومن إعداد النطاق المسموح به، ثم حاول مرة أخرى.");
+  }
+});
+async function logout() {
+  try { await signOut(auth); }
+  catch(e) { message("تعذر تسجيل الخروج. حاول مرة أخرى."); }
+}
+$("googleLogout").addEventListener("click", logout);
+$("signOutTop").addEventListener("click", logout);
+
+window.__hesabatiCloudSave = (data) => {
+  if (!activeUid) return;
+  const uid = activeUid;
+  const safeData = JSON.parse(JSON.stringify(data));
+  saveQueue = saveQueue.then(() => setDoc(dataRef(uid), {
+    ...safeData,
+    updatedAt: serverTimestamp()
+  })).then(() => {
+    if (activeUid === uid) window.__hesabatiSetSyncStatus("تم الحفظ على السحابة");
+  }).catch(e => {
+    console.error(e);
+    if (activeUid === uid) window.__hesabatiSetSyncStatus("تعذر الحفظ السحابي — راجع قواعد Firestore والاتصال");
+  });
+};
+
+onAuthStateChanged(auth, async user => {
+  if (!user) {
+    activeUid = null;
+    document.body.classList.remove("authenticated");
+    $("googleLogin").hidden = false;
+    $("googleLogout").hidden = true;
+    $("signOutTop").hidden = true;
+    $("signedInAs").textContent = "";
+    message("سجّل الدخول باستخدام حساب Google للمتابعة.");
+    return;
+  }
+  activeUid = user.uid;
+  document.body.classList.add("authenticated");
+  $("googleLogin").hidden = true;
+  $("googleLogout").hidden = false;
+  $("signOutTop").hidden = false;
+  $("signedInAs").textContent = "تم تسجيل الدخول: " + (user.displayName || user.email || "حساب Google");
+  message("جارٍ تحميل بيانات حسابك...");
+  window.__hesabatiSetSyncStatus("جارٍ تحميل البيانات...");
+  try {
+    const snap = await getDoc(dataRef(user.uid));
+    const cloudData = snap.exists() ? snap.data() : null;
+    window.__hesabatiSetCloudUser(user.uid, cloudData);
+    if (!snap.exists()) {
+      // Initialize this account's cloud document with its own local data or an empty structure.
+      const current = window.__hesabatiGetDb();
+      await setDoc(dataRef(user.uid), {...current, updatedAt: serverTimestamp()});
+    }
+    message("تم تسجيل الدخول وتحميل بيانات حسابك.");
+    window.__hesabatiSetSyncStatus("متصل");
+  } catch (e) {
+    console.error(e);
+    message("تم تسجيل الدخول لكن تعذر تحميل البيانات. تأكد من نشر قواعد Firestore المرفقة.");
+    window.__hesabatiSetSyncStatus("خطأ في المزامنة");
+  }
+});
+</script>
+
 </body>
 </html>
