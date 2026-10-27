@@ -17,7 +17,6 @@ input,select{display:block;width:100%;padding:12px;margin:7px 0 14px;border:1px 
 
 #authGate{max-width:520px;margin:30px auto;padding:24px;background:white;border-radius:14px;box-shadow:0 2px 12px #0001;text-align:center}
 #authGate button{width:100%;margin:8px 0}
-#cloudStatus{font-size:14px;line-height:1.7}
 body:not(.authenticated) nav,body:not(.authenticated) main{display:none}
 #userBar{display:none;background:#f0fdf4;padding:10px;text-align:center}
 body.authenticated #userBar{display:block}
@@ -317,6 +316,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const store = getFirestore(app);
 const provider = new GoogleAuthProvider();
+provider.setCustomParameters({ prompt: "select_account" });
 const $ = id => document.getElementById(id);
 let activeUid = null;
 let saveQueue = Promise.resolve();
