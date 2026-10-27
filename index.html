@@ -30,7 +30,6 @@ body.authenticated #userBar{display:block}
   <button id="googleLogin" class="primary" type="button">المتابعة باستخدام Google</button>
   <button id="googleLogout" class="secondary" type="button" hidden>تسجيل الخروج</button>
   <p id="authMessage" role="status">جارٍ الاتصال بخدمات تسجيل الدخول...</p>
-  <p id="cloudStatus" class="notice">لا تدخل بيانات حقيقية قبل التأكد من قواعد الأمان وإعداد النطاق المسموح به.</p>
 </section>
 <div id="userBar"><span id="signedInAs"></span> — <button id="signOutTop" class="secondary" type="button">تسجيل الخروج</button> <span id="syncStatus"> | مزامنة البيانات السحابية</span></div>
 <header><h1>📊 حساباتي</h1><p>برنامج بسيط لإدارة المحلات</p></header>
@@ -71,10 +70,16 @@ let db=load(), cart=[];
 window.__hesabatiSetCloudUser = (uid, cloudData) => {
   KEY = "hesabati_user_" + uid;
   const valid = cloudData && Array.isArray(cloudData.products) && Array.isArray(cloudData.sales) && Array.isArray(cloudData.expenses) && Array.isArray(cloudData.debts);
-  if (valid) db = cloudData;
-  else {
-    // Use only this user's browser-local data as a one-time migration source when cloud data is empty.
-    db = load();
+  if (valid) {
+    db = {
+      products: cloudData.products,
+      sales: cloudData.sales,
+      expenses: cloudData.expenses,
+      debts: cloudData.debts
+    };
+  } else {
+    // New account: start empty. Never inherit data from another signed-in account.
+    db = blank();
     try { localStorage.setItem(KEY, JSON.stringify(db)); } catch(e) {}
   }
   cart = [];
@@ -354,6 +359,10 @@ window.__hesabatiCloudSave = (data) => {
 onAuthStateChanged(auth, async user => {
   if (!user) {
     activeUid = null;
+    db = blank();
+    cart = [];
+    KEY = "hesabati_starter_v1";
+    render();
     document.body.classList.remove("authenticated");
     $("googleLogin").hidden = false;
     $("googleLogout").hidden = true;
