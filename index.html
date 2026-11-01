@@ -20,6 +20,13 @@ input,select{display:block;width:100%;padding:12px;margin:7px 0 14px;border:1px 
 body:not(.authenticated) nav,body:not(.authenticated) main{display:none}
 #userBar{display:none;background:#f0fdf4;padding:10px;text-align:center}
 body.authenticated #userBar{display:block}
+
+.payment-box{margin-top:22px;padding:18px;text-align:right;border:1px solid #bbf7d0;border-radius:12px;background:#f0fdf4;line-height:1.8}
+.payment-box h3{text-align:center;margin-top:0;color:#166534}.payment-price{text-align:center;font-size:21px;font-weight:bold;color:#166534}
+.wallet-number{text-align:center;font-size:25px;font-weight:bold;letter-spacing:1px;background:white;padding:10px;border-radius:8px;margin:10px 0}
+.payment-steps{padding-right:22px}.whatsapp-link{display:block;text-align:center;text-decoration:none;background:#15803d;color:white;padding:12px;border-radius:8px;font-weight:bold;margin-top:12px}
+.payment-note{font-size:13px;color:#7c2d12;background:#fff7ed;padding:10px;border-radius:8px;margin-bottom:0}
+
 </style>
 </head>
 <body>
@@ -29,6 +36,21 @@ body.authenticated #userBar{display:block}
   <button id="googleLogin" class="primary" type="button">المتابعة باستخدام Google</button>
   <button id="googleLogout" class="secondary" type="button" hidden>تسجيل الخروج</button>
   <p id="authMessage" role="status">جارٍ الاتصال بخدمات تسجيل الدخول...</p>
+  <div class="payment-box">
+    <h3>اشتراك دفترِكسا مدى الحياة</h3>
+    <div class="payment-price">250 جنيه — دفعة واحدة</div>
+    <p>حوّل قيمة الاشتراك من خلال فودافون كاش إلى الرقم التالي:</p>
+    <div class="wallet-number" dir="ltr">01032069779</div>
+    <button type="button" class="secondary" id="copyWallet">نسخ رقم المحفظة</button>
+    <ol class="payment-steps">
+      <li>حوّل 250 جنيه إلى محفظة فودافون كاش الموضحة أعلاه.</li>
+      <li>احتفظ برقم العملية، ولا تعتمد على صورة التحويل وحدها.</li>
+      <li>اضغط زر واتساب وأرسل رقم العملية والبريد الذي تستخدمه لتسجيل الدخول.</li>
+      <li>سيتم مراجعة وصول المبلغ وتأكيد التفعيل يدويًا.</li>
+    </ol>
+    <a class="whatsapp-link" href="https://wa.me/201032069779?text=%D8%A3%D8%B1%D8%BA%D8%A8%20%D9%81%D9%8A%20%D8%A7%D8%B4%D8%AA%D8%B1%D8%A7%D9%83%20%D8%AF%D9%81%D8%AA%D8%B1%D9%90%D9%83%D8%B3%D8%A7%20%D9%85%D8%AF%D9%89%20%D8%A7%D9%84%D8%AD%D9%8A%D8%A7%D8%A9%20%D8%A8%D9%80250%20%D8%AC%D9%86%D9%8A%D9%87.%20%D8%A7%D9%84%D8%A7%D8%B3%D9%85%3A%20%5B%D8%A7%D8%B3%D9%85%D9%83%5D%D8%8C%20%D8%A8%D8%B1%D9%8A%D8%AF%20%D8%AD%D8%B3%D8%A7%D8%A8%20Google%3A%20%5B%D8%A7%D9%84%D8%A8%D8%B1%D9%8A%D8%AF%5D%D8%8C%20%D8%B1%D9%82%D9%85%20%D8%B9%D9%85%D9%84%D9%8A%D8%A9%20%D8%A7%D9%84%D8%AA%D8%AD%D9%88%D9%8A%D9%84%3A%20%5B%D8%B1%D9%82%D9%85%20%D8%A7%D9%84%D8%B9%D9%85%D9%84%D9%8A%D8%A9%5D" target="_blank" rel="noopener">إرسال بيانات التحويل على واتساب</a>
+    <p class="payment-note">مهم: هذه الصفحة تعرض طريقة الدفع وتستقبل طلب التفعيل فقط. التفعيل لا يتم تلقائيًا، ولا يزال قفل البرنامج على غير المشتركين يحتاج إعداد صلاحيات آمن على Firebase قبل البيع الفعلي.</p>
+  </div>
 </section>
 <div id="userBar"><span id="signedInAs"></span> — <button id="signOutTop" class="secondary" type="button">تسجيل الخروج</button> <span id="syncStatus"> | مزامنة البيانات السحابية</span></div>
 <header><h1>📊 دفترِكسا DAFTREXA</h1><p>برنامج بسيط لإدارة المحلات</p></header>
@@ -296,6 +318,13 @@ $("importBackupFile").addEventListener("change",async e=>{
 });
 
 render();
+</script>
+
+<script>
+document.getElementById("copyWallet")?.addEventListener("click",async()=>{
+  try{await navigator.clipboard.writeText("01032069779");alert("تم نسخ رقم المحفظة.");}
+  catch(e){alert("انسخ الرقم يدويًا: 01032069779");}
+});
 </script>
 
 <script type="module">
