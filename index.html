@@ -113,6 +113,12 @@ window.__hesabatiSetCloudUser = (uid, cloudData) => {
   render();
 };
 window.__hesabatiGetDb = () => db;
+window.__hesabatiResetCloudUser = () => {
+  db = blank();
+  cart = [];
+  KEY = "hesabati_starter_v1";
+  render();
+};
 window.__hesabatiSetSyncStatus = (message) => { const el=$("syncStatus"); if(el) el.textContent=" | "+message; };
 
 function save(){
@@ -331,6 +337,8 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/13.1.0/firebas
 import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js";
 
+const $ = id => document.getElementById(id);
+
 const firebaseConfig = {
   apiKey: "AIzaSyC2FAA6x_QPkFDdNNyXDP7OQVy8oCDjZ0A",
   authDomain: "hesabati-d78c8.firebaseapp.com",
@@ -381,7 +389,7 @@ $("activateCustomer").addEventListener("click", async () => {
     $("adminMessage").textContent = "تعذر التفعيل. تأكد من نشر قواعد Firestore الجديدة.";
   }
 });
-const $ = id => document.getElementById(id);
+
 let activeUid = null;
 let saveQueue = Promise.resolve();
 
@@ -424,8 +432,9 @@ onAuthStateChanged(auth, async user => {
   currentUser = user || null;
   if (!user) {
     activeUid = null;
-    db = blank(); cart = []; KEY = "hesabati_starter_v1";
-    render();
+    if (window.__hesabatiResetCloudUser) {
+      window.__hesabatiResetCloudUser();
+    }
     document.body.classList.remove("authenticated", "app-enabled");
     $("googleLogin").hidden = false;
     $("googleLogout").hidden = true;
