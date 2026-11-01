@@ -49,14 +49,15 @@ body.authenticated #userBar{display:block}
     <button id="sendPaymentWhatsApp" class="primary" type="button">إرسال بيانات التحويل على واتساب</button>
   </div>
   <p id="paymentMessage" role="status"></p>
-  <div id="adminPanel">
-    <h3>لوحة المدير — تفعيل عميل</h3>
-    <p>أدخل Firebase UID للعميل بعد التأكد من وصول التحويل فعليًا.</p>
-    <input id="customerUid" placeholder="Firebase UID للعميل">
-    <button id="activateCustomer" class="primary" type="button">تفعيل مدى الحياة</button>
-    <p id="adminMessage" role="status"></p>
-  </div>
   <button id="paymentLogout" class="secondary" type="button">تسجيل الخروج</button>
+</section>
+<section id="adminPanel" class="panel" style="display:none;max-width:650px;margin:18px auto;padding:20px">
+  <h3>لوحة المدير — تفعيل عميل</h3>
+  <p>أدخل Firebase UID للعميل بعد التأكد من وصول مبلغ 250 جنيه فعليًا إلى المحفظة.</p>
+  <label for="customerUid">Firebase UID للعميل</label>
+  <input id="customerUid" placeholder="الصق UID العميل هنا" autocomplete="off" spellcheck="false">
+  <button id="activateCustomer" class="primary" type="button">تفعيل مدى الحياة</button>
+  <p id="adminMessage" role="status" aria-live="polite"></p>
 </section>
 <div id="userBar"><span id="signedInAs"></span> — <button id="signOutTop" class="secondary" type="button">تسجيل الخروج</button> <span id="syncStatus"> | مزامنة البيانات السحابية</span></div>
 <header><h1>📊 دفترِكسا DAFTREXA</h1><p>برنامج بسيط لإدارة المحلات</p></header>
@@ -376,6 +377,7 @@ $("activateCustomer").addEventListener("click", async () => {
   if (!uid) { $("adminMessage").textContent = "اكتب UID العميل أولًا."; return; }
   if (uid === ADMIN_UID) { $("adminMessage").textContent = "حساب المدير مفعّل بالفعل."; return; }
   if (!confirm("تأكدت من استلام 250 جنيه فعليًا من هذا العميل؟")) return;
+  $("activateCustomer").disabled = true;
   $("adminMessage").textContent = "جارٍ تفعيل الاشتراك...";
   try {
     await setDoc(subscriptionRef(uid), {
@@ -386,7 +388,9 @@ $("activateCustomer").addEventListener("click", async () => {
     $("customerUid").value = "";
   } catch(e) {
     console.error(e);
-    $("adminMessage").textContent = "تعذر التفعيل. تأكد من نشر قواعد Firestore الجديدة.";
+    $("adminMessage").textContent = "تعذر التفعيل. تأكد من تسجيل الدخول بحساب المدير ونشر قواعد Firestore المرفقة.";
+  } finally {
+    $("activateCustomer").disabled = false;
   }
 });
 
