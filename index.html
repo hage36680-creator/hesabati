@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>حساباتي - إدارة المحلات</title>
+<title>دفترِكسا DAFTREXA - إدارة المحلات</title>
 <style>
 *{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f1f5f9;color:#1e293b}
 header{background:#166534;color:white;padding:20px;text-align:center}nav{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;background:white;padding:12px}
@@ -24,14 +24,14 @@ body.authenticated #userBar{display:block}
 </head>
 <body>
 <section id="authGate">
-  <h2>أهلًا بك في حساباتي</h2>
+  <h2>أهلًا بك في دفترِكسا</h2>
   <p>سجّل الدخول بحساب Google للوصول إلى بيانات محلك المحفوظة بأمان.</p>
   <button id="googleLogin" class="primary" type="button">المتابعة باستخدام Google</button>
   <button id="googleLogout" class="secondary" type="button" hidden>تسجيل الخروج</button>
   <p id="authMessage" role="status">جارٍ الاتصال بخدمات تسجيل الدخول...</p>
 </section>
 <div id="userBar"><span id="signedInAs"></span> — <button id="signOutTop" class="secondary" type="button">تسجيل الخروج</button> <span id="syncStatus"> | مزامنة البيانات السحابية</span></div>
-<header><h1>📊 حساباتي</h1><p>برنامج بسيط لإدارة المحلات</p></header>
+<header><h1>📊 دفترِكسا DAFTREXA</h1><p>برنامج بسيط لإدارة المحلات</p></header>
 <nav>
 <button onclick="showPage('home')">الرئيسية</button><button onclick="showPage('products')">المنتجات</button><button onclick="showPage('sales')">المبيعات</button><button onclick="showPage('expenses')">المصروفات</button><button onclick="showPage('debts')">ديون العملاء</button>
 </nav>
@@ -42,12 +42,12 @@ body.authenticated #userBar{display:block}
 <div class="card"><h3>إجمالي المصروفات</h3><div id="totalExpenses" class="number">0 ج.م</div></div>
 <div class="card"><h3>الربح التقديري</h3><div id="netProfit" class="number">0 ج.م</div></div>
 <div class="card"><h3>ديون العملاء المتبقية</h3><div id="totalDebts" class="number">0 ج.م</div></div></div>
-<div class="panel"><h3>أهلًا بيك في حساباتي 👋</h3><p>أضف المنتجات وسجّل المبيعات والمصروفات وديون العملاء.</p><div class="notice">البيانات مرتبطة بحسابك وتتم مزامنتها مع Firebase بعد تسجيل الدخول. احتفظ بنسخة احتياطية واختبر الحساب ببيانات تجريبية قبل الاستخدام الفعلي.</div><p><button type="button" class="primary" id="exportBackup">تنزيل نسخة احتياطية</button> <button type="button" class="secondary" id="importBackupBtn">استعادة نسخة احتياطية</button><input type="file" id="importBackupFile" accept=".json,application/json" hidden></p></div></section>
+<div class="panel"><h3>أهلًا بيك في دفترِكسا 👋</h3><p>أضف المنتجات وسجّل المبيعات والمصروفات وديون العملاء.</p><div class="notice">البيانات مرتبطة بحسابك وتتم مزامنتها مع Firebase بعد تسجيل الدخول. احتفظ بنسخة احتياطية واختبر الحساب ببيانات تجريبية قبل الاستخدام الفعلي.</div><p><button type="button" class="primary" id="exportBackup">تنزيل نسخة احتياطية</button> <button type="button" class="secondary" id="importBackupBtn">استعادة نسخة احتياطية</button><input type="file" id="importBackupFile" accept=".json,application/json" hidden></p></div></section>
 <section id="products" class="page"><h2>المنتجات</h2><div class="panel"><h3 id="productTitle">إضافة منتج</h3><form id="productForm"><input id="productId" type="hidden"><label>اسم المنتج</label><input id="productName" required maxlength="100" placeholder="مثلاً: سكر"><label>تكلفة شراء الوحدة</label><input id="productCost" type="number" min="0" step=".01" required><label>سعر بيع الوحدة</label><input id="productPrice" type="number" min="0" step=".01" required><label>الكمية</label><input id="productQuantity" type="number" min="0" step="1" required><button class="primary">حفظ المنتج</button><button type="button" class="secondary" id="cancelEdit" hidden>إلغاء</button></form></div><div class="panel"><h3>قائمة المنتجات</h3><label>بحث سريع عن منتج</label><input id="productSearch" placeholder="اكتب اسم المنتج أو أول حروفه..."><div class="table-wrap"><table><thead><tr><th>الاسم</th><th>التكلفة</th><th>سعر البيع</th><th>الكمية</th><th>إجراءات</th></tr></thead><tbody id="productsTable"></tbody></table></div></div></section>
 <section id="sales" class="page"><h2>المبيعات</h2><div class="panel"><h3>إضافة منتجات إلى الفاتورة</h3><label>ابحث عن المنتج بالاسم أو أول حروفه</label><input id="saleSearch" placeholder="اكتب اسم المنتج..."><label>المنتج</label><select id="saleProduct"></select><label>الكمية</label><input id="saleQuantity" type="number" min="1" step="1" value="1"><button type="button" class="primary" id="addToCart">إضافة للفاتورة</button><div class="table-wrap"><table><thead><tr><th>المنتج</th><th>سعر الوحدة</th><th>الكمية</th><th>الإجمالي</th><th>إجراء</th></tr></thead><tbody id="cartTable"></tbody></table></div><h3>إجمالي الفاتورة: <span id="cartTotal">0 ج.م</span></h3><label>طريقة الدفع</label><select id="saleType"><option value="cash">نقدي</option><option value="debt">آجل</option></select><div id="customerField" hidden><label>اسم العميل</label><input id="saleCustomer" maxlength="100"></div><button type="button" class="primary" id="completeSale">تأكيد البيع</button><button type="button" class="secondary" id="clearCart">إفراغ الفاتورة</button></div><div class="panel"><h3>سجل المبيعات</h3><div class="table-wrap"><table><thead><tr><th>التاريخ</th><th>رقم الفاتورة</th><th>المنتج</th><th>الكمية</th><th>الإجمالي</th><th>الدفع</th></tr></thead><tbody id="salesTable"></tbody></table></div></div></section>
 <section id="expenses" class="page"><h2>المصروفات</h2><div class="panel"><form id="expenseForm"><label>سبب المصروف</label><input id="expenseName" required maxlength="100" placeholder="مثلاً: كهرباء"><label>المبلغ بالجنيه</label><input id="expenseAmount" type="number" min=".01" step=".01" required><button class="primary">إضافة المصروف</button></form></div><div class="panel"><h3>سجل المصروفات</h3><div class="table-wrap"><table><thead><tr><th>التاريخ</th><th>السبب</th><th>المبلغ</th><th>إجراء</th></tr></thead><tbody id="expensesTable"></tbody></table></div></div></section>
 <section id="debts" class="page"><h2>ديون العملاء</h2><div class="panel"><form id="debtForm"><label>اسم العميل</label><input id="debtCustomer" required maxlength="100"><label>المبلغ بالجنيه</label><input id="debtAmount" type="number" min=".01" step=".01" required><button class="primary">إضافة الدين</button></form></div><div class="panel"><h3>سجل الديون</h3><label for="debtSearch">ابحث عن العميل</label><input id="debtSearch" type="search" placeholder="اكتب اسم العميل أو جزءًا منه..."><p id="debtSearchSummary" class="notice" hidden></p><div class="table-wrap"><table><thead><tr><th>العميل</th><th>الأصل</th><th>المدفوع</th><th>المتبقي</th><th>إجراءات</th></tr></thead><tbody id="debtsTable"></tbody></table></div></div></section>
-</main><footer>حساباتي — نسخة تجريبية</footer>
+</main><footer>دفترِكسا DAFTREXA — نسخة تجريبية</footer>
 <script>
 "use strict";
 const $ = id => document.getElementById(id);
@@ -279,8 +279,8 @@ function renderHome(){
 function render(){renderProducts();renderSales();renderExpenses();renderDebts();renderHome();renderCart();}
 
 $("exportBackup").addEventListener("click",()=>{
-  const blob=new Blob([JSON.stringify({app:"حساباتي",version:1,exportedAt:new Date().toISOString(),data:db},null,2)],{type:"application/json;charset=utf-8"});
-  const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="hesabati-backup-"+new Date().toISOString().slice(0,10)+".json";document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+  const blob=new Blob([JSON.stringify({app:"دفترِكسا DAFTREXA",version:1,exportedAt:new Date().toISOString(),data:db},null,2)],{type:"application/json;charset=utf-8"});
+  const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="daftrexa-backup-"+new Date().toISOString().slice(0,10)+".json";document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
 });
 $("importBackupBtn").addEventListener("click",()=>$("importBackupFile").click());
 $("importBackupFile").addEventListener("change",async e=>{
