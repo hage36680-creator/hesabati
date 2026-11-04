@@ -27,6 +27,46 @@ body.authenticated:not(.app-enabled) #paymentGate{display:block}
 #paymentMessage{min-height:24px;color:#475569}
 #userBar{display:none;background:#f0fdf4;padding:10px;text-align:center}
 body.authenticated #userBar{display:block}
+
+/* واجهة مبسطة وسريعة ومتوافقة مع الهاتف */
+:root{--green:#166534;--green2:#15803d;--ink:#17212b;--muted:#64748b;--line:#e2e8f0}
+body{background:#f6f8f7;color:var(--ink);line-height:1.55}
+header{padding:16px 14px 18px;background:linear-gradient(135deg,#14532d,#15803d)}
+header h1{margin:0 0 4px;font-size:clamp(22px,5vw,30px)}header p{margin:0;opacity:.9}
+nav{position:sticky;top:0;z-index:20;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;padding:8px;background:#fff;box-shadow:0 3px 12px #0f172a12}
+nav button{min-height:46px;padding:8px 4px;border-radius:10px;background:#f1f5f2;color:#28543a;font-weight:700;font-size:13px}
+nav button:focus,nav button:hover,nav button.active{background:var(--green);color:white}
+.container{max-width:980px;padding:16px 12px}
+.page h2{font-size:23px;margin:6px 2px 14px}
+.card,.panel{border:1px solid #edf1ee;border-radius:16px;box-shadow:0 4px 16px #0f172a08;padding:16px}
+.cards{grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:9px}
+.card h3{margin-bottom:8px}.number{font-size:clamp(20px,4vw,25px)}
+button{min-height:42px;border-radius:10px;font-weight:700;transition:transform .12s ease,opacity .12s ease}
+button:active{transform:scale(.98)}
+input,select{min-height:46px;border:1px solid #d7e0da;border-radius:10px;background:#fff;margin:6px 0 12px}
+input:focus,select:focus{outline:2px solid #86b99a;outline-offset:1px}
+label{display:block;margin-top:8px;font-size:14px}
+.primary,nav button.active{background:var(--green)}
+.secondary{background:#e8eeea;color:#234331}
+.danger{background:#b91c1c}
+.table-wrap{border:1px solid var(--line);border-radius:12px}
+table{min-width:560px}th{color:#475569;font-size:13px}td{font-size:14px}
+.notice{border:1px solid #bbf7d0}
+.quick-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:14px 0}
+.quick-actions button{min-height:58px;font-size:16px}
+.backup-tools{margin-top:14px;border-top:1px solid var(--line);padding-top:10px}
+.backup-tools summary{cursor:pointer;font-weight:700;color:#475569;padding:8px 0}
+#syncStatus{font-size:12px;color:#466653}
+@media(max-width:600px){
+ nav{grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;padding:6px}
+ nav button{font-size:11px;min-height:48px;line-height:1.2}
+ .container{padding:10px 8px}.panel,.card{padding:13px;margin-bottom:11px}
+ .cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .page h2{font-size:21px}
+ .quick-actions button{font-size:14px;padding:8px 4px}
+ #userBar{font-size:12px;padding:8px}
+}
+
 </style>
 </head>
 <body>
@@ -62,7 +102,7 @@ body.authenticated #userBar{display:block}
 <div id="userBar"><span id="signedInAs"></span> — <button id="signOutTop" class="secondary" type="button">تسجيل الخروج</button> <span id="syncStatus"> | مزامنة البيانات السحابية</span></div>
 <header><h1>📊 دفترِكسا DAFTREXA</h1><p>برنامج بسيط لإدارة المحلات</p></header>
 <nav>
-<button onclick="showPage('home')">الرئيسية</button><button onclick="showPage('products')">المنتجات</button><button onclick="showPage('sales')">المبيعات</button><button onclick="showPage('expenses')">المصروفات</button><button onclick="showPage('debts')">ديون العملاء</button>
+<button class="active" aria-label="الرئيسية" onclick="showPage('home')">الرئيسية</button><button aria-label="المنتجات" onclick="showPage('products')">المنتجات</button><button aria-label="المبيعات" onclick="showPage('sales')">المبيعات</button><button aria-label="المصروفات" onclick="showPage('expenses')">المصروفات</button><button aria-label="ديون العملاء" onclick="showPage('debts')">الديون</button>
 </nav>
 <main class="container">
 <section id="home" class="page active"><h2>لوحة التحكم</h2><div class="cards">
@@ -71,11 +111,11 @@ body.authenticated #userBar{display:block}
 <div class="card"><h3>إجمالي المصروفات</h3><div id="totalExpenses" class="number">0 ج.م</div></div>
 <div class="card"><h3>الربح التقديري</h3><div id="netProfit" class="number">0 ج.م</div></div>
 <div class="card"><h3>ديون العملاء المتبقية</h3><div id="totalDebts" class="number">0 ج.م</div></div></div>
-<div class="panel"><h3>أهلًا بيك في دفترِكسا 👋</h3><p>أضف المنتجات وسجّل المبيعات والمصروفات وديون العملاء.</p><div class="notice">البيانات مرتبطة بحسابك وتتم مزامنتها مع Firebase بعد تسجيل الدخول. احتفظ بنسخة احتياطية واختبر الحساب ببيانات تجريبية قبل الاستخدام الفعلي.</div><p><button type="button" class="primary" id="exportBackup">تنزيل نسخة احتياطية</button> <button type="button" class="secondary" id="importBackupBtn">استعادة نسخة احتياطية</button><input type="file" id="importBackupFile" accept=".json,application/json" hidden></p></div></section>
+<div class="panel"><h3>أهلًا بيك في دفترِكسا 👋</h3><p>اختار العملية اللي عايز تعملها مباشرة.</p><div class="quick-actions"><button type="button" class="primary" onclick="showPage('sales')">＋ بيع جديد</button><button type="button" class="secondary" onclick="showPage('products')">📦 إضافة منتج</button><button type="button" class="secondary" onclick="showPage('debts')">👥 متابعة الديون</button><button type="button" class="secondary" onclick="showPage('expenses')">💸 تسجيل مصروف</button></div><details class="backup-tools"><summary>النسخ الاحتياطي للبيانات</summary><p class="notice">احتفظ بنسخة احتياطية لاستعادة بياناتك عند الحاجة.</p><button type="button" class="primary" id="exportBackup">تنزيل نسخة احتياطية</button> <button type="button" class="secondary" id="importBackupBtn">استعادة نسخة احتياطية</button><input type="file" id="importBackupFile" accept=".json,application/json" hidden></details></div></section>
 <section id="products" class="page"><h2>المنتجات</h2><div class="panel"><h3 id="productTitle">إضافة منتج</h3><form id="productForm"><input id="productId" type="hidden"><label>اسم المنتج</label><input id="productName" required maxlength="100" placeholder="مثلاً: سكر"><label>تكلفة شراء الوحدة</label><input id="productCost" type="number" min="0" step=".01" required><label>سعر بيع الوحدة</label><input id="productPrice" type="number" min="0" step=".01" required><label>الكمية</label><input id="productQuantity" type="number" min="0" step="1" required><button class="primary">حفظ المنتج</button><button type="button" class="secondary" id="cancelEdit" hidden>إلغاء</button></form></div><div class="panel"><h3>قائمة المنتجات</h3><label>بحث سريع عن منتج</label><input id="productSearch" placeholder="اكتب اسم المنتج أو أول حروفه..."><div class="table-wrap"><table><thead><tr><th>الاسم</th><th>التكلفة</th><th>سعر البيع</th><th>الكمية</th><th>إجراءات</th></tr></thead><tbody id="productsTable"></tbody></table></div></div></section>
 <section id="sales" class="page"><h2>المبيعات</h2><div class="panel"><h3>إضافة منتجات إلى الفاتورة</h3><label>ابحث عن المنتج بالاسم أو أول حروفه</label><input id="saleSearch" placeholder="اكتب اسم المنتج..."><label>المنتج</label><select id="saleProduct"></select><label>الكمية</label><input id="saleQuantity" type="number" min="1" step="1" value="1"><button type="button" class="primary" id="addToCart">إضافة للفاتورة</button><div class="table-wrap"><table><thead><tr><th>المنتج</th><th>سعر الوحدة</th><th>الكمية</th><th>الإجمالي</th><th>إجراء</th></tr></thead><tbody id="cartTable"></tbody></table></div><h3>إجمالي الفاتورة: <span id="cartTotal">0 ج.م</span></h3><label>طريقة الدفع</label><select id="saleType"><option value="cash">نقدي</option><option value="debt">آجل</option></select><div id="customerField" hidden><label>اسم العميل</label><input id="saleCustomer" maxlength="100"></div><button type="button" class="primary" id="completeSale">تأكيد البيع</button><button type="button" class="secondary" id="clearCart">إفراغ الفاتورة</button></div><div class="panel"><h3>سجل المبيعات</h3><div class="table-wrap"><table><thead><tr><th>التاريخ</th><th>رقم الفاتورة</th><th>المنتج</th><th>الكمية</th><th>الإجمالي</th><th>الدفع</th></tr></thead><tbody id="salesTable"></tbody></table></div></div></section>
 <section id="expenses" class="page"><h2>المصروفات</h2><div class="panel"><form id="expenseForm"><label>سبب المصروف</label><input id="expenseName" required maxlength="100" placeholder="مثلاً: كهرباء"><label>المبلغ بالجنيه</label><input id="expenseAmount" type="number" min=".01" step=".01" required><button class="primary">إضافة المصروف</button></form></div><div class="panel"><h3>سجل المصروفات</h3><div class="table-wrap"><table><thead><tr><th>التاريخ</th><th>السبب</th><th>المبلغ</th><th>إجراء</th></tr></thead><tbody id="expensesTable"></tbody></table></div></div></section>
-<section id="debts" class="page"><h2>ديون العملاء</h2><div class="panel"><form id="debtForm"><label>اسم العميل</label><input id="debtCustomer" required maxlength="100"><label>المبلغ بالجنيه</label><input id="debtAmount" type="number" min=".01" step=".01" required><button class="primary">إضافة الدين</button></form></div><div class="panel"><h3>سجل الديون</h3><label for="debtSearch">ابحث عن العميل</label><input id="debtSearch" type="search" placeholder="اكتب اسم العميل أو جزءًا منه..."><p id="debtSearchSummary" class="notice" hidden></p><div class="table-wrap"><table><thead><tr><th>العميل</th><th>الأصل</th><th>المدفوع</th><th>المتبقي</th><th>إجراءات</th></tr></thead><tbody id="debtsTable"></tbody></table></div></div></section>
+<section id="debts" class="page"><h2>ديون العملاء</h2><div class="panel"><form id="debtForm"><label>اسم العميل</label><input id="debtCustomer" required maxlength="100"><label>المبلغ بالجنيه</label><input id="debtAmount" type="number" min=".01" step=".01" required><button class="primary">إضافة الدين</button></form></div><div class="panel"><h3>سجل الديون</h3><label for="debtSearch">ابحث عن العميل</label><input id="debtSearch" type="search" placeholder="اكتب اسم العميل أو جزءًا منه..."><p id="debtSearchSummary" class="notice" hidden></p><div class="table-wrap"><table><thead><tr><th>العميل</th><th>الفاتورة والمنتجات</th><th>إجمالي الفاتورة</th><th>المدفوع</th><th>المتبقي</th><th>إجراءات</th></tr></thead><tbody id="debtsTable"></tbody></table></div></div></section>
 </main><footer>دفترِكسا DAFTREXA — نسخة تجريبية</footer>
 <script>
 "use strict";
@@ -133,9 +173,12 @@ function save(){
 function id(){return Date.now().toString(36)+Math.random().toString(36).slice(2);}
 function money(n){return Number(n||0).toLocaleString("ar-EG",{minimumFractionDigits:2,maximumFractionDigits:2})+" ج.م";}
 function now(){return new Date().toLocaleString("ar-EG");}
+let activePage = "home";
 function showPage(pageId){
-  document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));
-  const page=$(pageId); if(page) page.classList.add("active");
+  const page=$(pageId); if(!page)return;
+  activePage=pageId;
+  document.querySelectorAll(".page").forEach(x=>x.classList.toggle("active",x===page));
+  document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",(b.getAttribute("onclick")||"").includes("'"+pageId+"'")));
   render();
 }
 function addCell(tr,value){
@@ -286,24 +329,51 @@ $("debtSearch").addEventListener("input",renderDebts);
 function renderDebts(){
   const tb=$("debtsTable");tb.replaceChildren();
   const q=($("debtSearch")?.value||"").trim().toLocaleLowerCase("ar");
-  const filtered=db.debts.filter(d=>(String(d.customer||"")).toLocaleLowerCase("ar").includes(q));
+  // Group all product-debt lines that belong to the same sales invoice.
+  // Older/manual debts without an invoiceId remain separate records.
+  const groupsMap=new Map();
+  db.debts.forEach(d=>{
+    const key=d.invoiceId?"invoice:"+d.invoiceId:"debt:"+d.id;
+    if(!groupsMap.has(key))groupsMap.set(key,{key,invoiceId:d.invoiceId||null,customer:d.customer||"—",items:[]});
+    groupsMap.get(key).items.push(d);
+  });
+  const groups=[...groupsMap.values()].filter(g=>g.customer.toLocaleLowerCase("ar").includes(q));
   const summary=$("debtSearchSummary");
   if(summary){
-    if(q){const total=filtered.reduce((a,d)=>a+(Number(d.original)||0),0),paidTotal=filtered.reduce((a,d)=>a+(Number(d.paid)||0),0),remainingTotal=filtered.reduce((a,d)=>a+Math.max(0,(Number(d.original)||0)-(Number(d.paid)||0)),0);summary.hidden=false;summary.textContent=`نتائج البحث: ${filtered.length} سجل — إجمالي الدين: ${money(total)} — المدفوع: ${money(paidTotal)} — المتبقي على العميل في كل السجلات: ${money(remainingTotal)}`;}
+    if(q){const total=groups.reduce((a,g)=>a+g.items.reduce((x,d)=>x+(Number(d.original)||0),0),0),paidTotal=groups.reduce((a,g)=>a+g.items.reduce((x,d)=>x+(Number(d.paid)||0),0),0),remainingTotal=Math.max(0,total-paidTotal);summary.hidden=false;summary.textContent=`نتائج البحث: ${groups.length} فاتورة/دين — إجمالي الدين: ${money(total)} — المدفوع: ${money(paidTotal)} — المتبقي: ${money(remainingTotal)}`;}
     else summary.hidden=true;
   }
-  filtered.forEach(d=>{
-    const original=Math.max(0,Number(d.original)||0),paid=Math.min(original,Math.max(0,Number(d.paid)||0)),remaining=Math.max(0,Number((original-paid).toFixed(2))),tr=document.createElement("tr");
-    addCell(tr,d.customer);addCell(tr,money(original));addCell(tr,money(paid));addCell(tr,money(remaining));const td=addCell(tr,"");
-    if(remaining>0)td.appendChild(btn("تسجيل سداد","primary",()=>{
-      const value=prompt("العميل: "+d.customer+"\nأصل الدين: "+money(original)+"\nالمدفوع سابقًا: "+money(paid)+"\nالمتبقي: "+money(remaining)+"\n\nاكتب المبلغ الذي دفعه العميل:");
+  groups.forEach(g=>{
+    const original=Number(g.items.reduce((a,d)=>a+(Number(d.original)||0),0).toFixed(2));
+    const paid=Number(g.items.reduce((a,d)=>a+(Number(d.paid)||0),0).toFixed(2));
+    const remaining=Math.max(0,Number((original-paid).toFixed(2))),tr=document.createElement("tr");
+    addCell(tr,g.customer);
+    const details=addCell(tr,"");
+    if(g.invoiceId){
+      const related=db.sales.filter(x=>x.invoiceId===g.invoiceId);
+      details.textContent=(g.invoiceId+" — "+related.map(x=>(x.productName||"منتج")+" × "+(Number(x.quantity)||0)).join("، "));
+    }else details.textContent="دين مسجل يدويًا";
+    addCell(tr,money(original));addCell(tr,money(paid));addCell(tr,money(remaining));
+    const td=addCell(tr,"");
+    if(remaining>0)td.appendChild(btn("تسجيل سداد الفاتورة","primary",()=>{
+      const value=prompt("العميل: "+g.customer+"\n"+(g.invoiceId?"رقم الفاتورة: "+g.invoiceId+"\n":"")+"إجمالي الفاتورة: "+money(original)+"\nالمدفوع سابقًا: "+money(paid)+"\nالمتبقي: "+money(remaining)+"\n\nاكتب المبلغ الذي دفعه العميل:");
       if(value===null||value.trim()==="")return;const n=Number(value);
       if(!Number.isFinite(n)||n<=0||n>remaining+0.000001){alert("مبلغ غير صحيح؛ أدخل مبلغًا أكبر من صفر ولا يتجاوز المتبقي.");return;}
-      d.paid=Math.min(original,Number((paid+n).toFixed(2)));if(save())render();
-    }));else td.textContent="تم السداد";
+      // Allocate one payment across the invoice's item lines, in order.
+      let left=Number(n.toFixed(2));
+      for(const d of g.items){
+        const debtOriginal=Math.max(0,Number(d.original)||0),debtPaid=Math.min(debtOriginal,Math.max(0,Number(d.paid)||0));
+        const lineRemaining=Math.max(0,Number((debtOriginal-debtPaid).toFixed(2)));
+        if(lineRemaining<=0||left<=0)continue;
+        const applied=Math.min(lineRemaining,left);
+        d.paid=Number((debtPaid+applied).toFixed(2));
+        left=Number((left-applied).toFixed(2));
+      }
+      if(save())render();
+    }));else td.textContent="تم السداد بالكامل";
     tb.appendChild(tr);
   });
-  if(!filtered.length)emptyRow(tb,q?"لا توجد ديون مطابقة لبحثك":"لا توجد ديون مسجلة",5);
+  if(!groups.length)emptyRow(tb,q?"لا توجد ديون مطابقة لبحثك":"لا توجد ديون مسجلة",6);
 }
 function renderHome(){
   const sales=db.sales.reduce((a,s)=>a+(Number(s.total)||0),0),cost=db.sales.reduce((a,s)=>a+(Number(s.unitCost)||0)*(Number(s.quantity)||0),0);
@@ -311,7 +381,13 @@ function renderHome(){
   $("totalProducts").textContent=db.products.length;$("totalSales").textContent=money(sales);
   $("totalExpenses").textContent=money(expenses);$("netProfit").textContent=money(sales-cost-expenses);$("totalDebts").textContent=money(debts);
 }
-function render(){renderProducts();renderSales();renderExpenses();renderDebts();renderHome();renderCart();}
+function render(){
+  renderHome();
+  if(activePage==="products"||activePage==="sales")renderProducts();
+  if(activePage==="sales") {renderSales();renderCart();}
+  if(activePage==="expenses")renderExpenses();
+  if(activePage==="debts")renderDebts();
+}
 
 $("exportBackup").addEventListener("click",()=>{
   const blob=new Blob([JSON.stringify({app:"دفترِكسا DAFTREXA",version:1,exportedAt:new Date().toISOString(),data:db},null,2)],{type:"application/json;charset=utf-8"});
